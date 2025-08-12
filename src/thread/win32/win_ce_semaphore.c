@@ -61,17 +61,27 @@ SYNCHHANDLE CreateSemaphoreCE (
 {
    SYNCHHANDLE hSynch = NULL, result = NULL;
 
+#if defined(_MSC_VER) && !defined(__GNUC__) && !defined(__WATCOMC__)
    __try
+#endif
 	{
       if (lInitialCount > lMaximumCount || lMaximumCount < 0 || lInitialCount < 0) 
 	  {
               /* Bad parameters */
          SetLastError (SYNCH_ERROR);
+#if defined(_MSC_VER) && !defined(__GNUC__) && !defined(__WATCOMC__)
          __leave;
+#else
+         goto LEAVE;
+#endif
       }
 
       hSynch = HeapAlloc (GetProcessHeap(), HEAP_ZERO_MEMORY, SYNCH_HANDLE_SIZE);
+#if defined(_MSC_VER) && !defined(__GNUC__) && !defined(__WATCOMC__)
       if (hSynch == NULL) __leave;
+#else
+      if (hSynch == NULL) goto LEAVE;
+#endif
 
       hSynch->MaxCount = lMaximumCount;
       hSynch->CurCount = lInitialCount;
@@ -87,7 +97,11 @@ SYNCHHANDLE CreateSemaphoreCE (
       ReleaseMutex (hSynch->hMutex);
       hSynch->hSemph = NULL;
    }
+#if defined(_MSC_VER) && !defined(__GNUC__) && !defined(__WATCOMC__)
    __finally
+#else
+LEAVE:
+#endif
    {
        /* Return with the handle, or, if there was any error, return
         a null after closing any open handles and freeing any allocated memory. */
@@ -105,7 +119,9 @@ BOOL ReleaseSemaphoreCE (SYNCHHANDLE hSemCE, LONG cReleaseCount, LPLONG lpPrevio
    /* Gain access to the object to assure that the release count
       would not cause the total count to exceed the maximum. */
 
-   __try 
+#if defined(_MSC_VER) && !defined(__GNUC__) && !defined(__WATCOMC__)
+   __try
+#endif
    {
       WaitForSingleObject (hSemCE->hMutex, INFINITE);
 	  /* reply only if asked to */	
@@ -115,7 +131,11 @@ BOOL ReleaseSemaphoreCE (SYNCHHANDLE hSemCE, LONG cReleaseCount, LPLONG lpPrevio
 	  {
          SetLastError (SYNCH_ERROR);
          Result = FALSE;
+#ifdef _MSC_VER
          __leave;
+#else
+         goto LEAVE;
+#endif
       }
       hSemCE->CurCount += cReleaseCount;
 
@@ -124,7 +144,11 @@ BOOL ReleaseSemaphoreCE (SYNCHHANDLE hSemCE, LONG cReleaseCount, LPLONG lpPrevio
 
       SetEvent (hSemCE->hEvent);
    }
+#ifdef _MSC_VER
    __finally
+#else
+LEAVE:
+#endif
    {
       ReleaseMutex (hSemCE->hMutex);
    }

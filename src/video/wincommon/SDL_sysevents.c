@@ -761,7 +761,7 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 	                                    0, 0, LR_DEFAULTCOLOR);
 	class.lpszMenuName	= NULL;
 	class.lpszClassName	= SDL_Appname;
-	class.hbrBackground	= NULL;
+	class.hbrBackground	= (HBRUSH)GetStockObject(BLACK_BRUSH);
 	class.hInstance		= SDL_Instance;
 	class.style		= SDL_Appstyle;
 #if SDL_VIDEO_OPENGL
