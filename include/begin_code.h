@@ -54,6 +54,12 @@
 #   else
 #    define DECLSPEC	__declspec(dllimport)
 #   endif
+#  elif defined(__GNUC__)
+#   ifdef BUILD_SDL
+#    define DECLSPEC	__declspec(dllexport)
+#   else
+#    define DECLSPEC	__declspec(dllimport)
+#   endif
 #  else
 #   define DECLSPEC	__declspec(dllexport)
 #  endif

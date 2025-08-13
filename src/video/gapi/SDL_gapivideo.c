@@ -68,7 +68,7 @@ Inspired by http://arisme.free.fr/ports/SDL.php
 // for testing with GapiEmu
 #define USE_GAPI_EMU 0
 #define EMULATE_AXIM_X30 0
-#define WITHOUT_GAPI 0
+#define WITHOUT_GAPI 1
 
 #if USE_GAPI_EMU && !REPORT_VIDEO_INFO
 #pragma message("Warning: Using GapiEmu in release build. I assume you'd like to set USE_GAPI_EMU to zero.")
@@ -834,6 +834,16 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 
 
 	/* Blank screen */
+#ifdef _WIN32_WCE
+	/* Erasing the old-dust in some wide screens */
+	if ((video->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN) {
+		HDC dc = GetDC(NULL);
+		PatBlt(dc, 0, 0, GetSystemMetrics(SM_CXSCREEN),
+		                 GetSystemMetrics(SM_CYSCREEN), BLACKNESS);
+		ReleaseDC(NULL, dc);
+	}
+#endif
+
 	allScreen.x = allScreen.y = 0;
 	allScreen.w = video->w - 1;
 	allScreen.h = video->h - 1;
